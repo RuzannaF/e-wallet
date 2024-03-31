@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { registration } from "../../redux/slices/authSlice"
+import { clearError, registration } from "../../redux/slices/AuthSlice"
 import { Form } from '../../components/Form'
-import { Title } from '../../components/Title'
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import * as SC from './styles'
 
 export const RegistrationPage = () => {
 
@@ -12,7 +12,11 @@ export const RegistrationPage = () => {
 
     const dispatch = useDispatch()
 
-    const { user, isAuth} = useSelector((state) => state.auth)
+    const { user, error} = useSelector((state) => state.auth)
+
+    useEffect(() => {
+        dispatch(clearError())
+    }, [dispatch])
 
     const onChange = (name, value) => {
         setFormValues({...formValues, [name]: value})
@@ -20,14 +24,16 @@ export const RegistrationPage = () => {
 
     const onSubmit = (e) => {
         e.preventDefault()
-        const { email, password } = formValues;
-        dispatch(registration({ email, password }));
+        const { email, password } = formValues
+        dispatch(registration({ email, password }))
     }
 
+    const disabled = !formValues.email || formValues.password.length <= 3
+
     return (
-        <>
-        <Title>Регистрация</Title>
+        <SC.Container>
         <Form onSubmit={onSubmit}>
+        <SC.Title>Регистрация</SC.Title>
             <Input
                 type="email"
                 name='email'
@@ -42,10 +48,10 @@ export const RegistrationPage = () => {
                 value={formValues.password}
                 onChange={(e) => onChange(e.target.name, e.target.value)}
             />
-            
-            <Button type='submit' className='primary'>Зарегистрироваться</Button>
+            <Button type='submit' className='primary' disabled={disabled}>Зарегистрироваться</Button>
+            {user.id && !user.isActivated && <SC.Text className='normal'>Для завершения регистрации перейдите по ссылке из письма в почте</SC.Text>}
+            {error.registration && <SC.Text className='error'>{error.registration}</SC.Text>}
         </Form>
-        {user && !user.isActivated && isAuth && <div>Вы успешно зарегистировались, перейдите по ссылке из письма в почте</div>}
-     </>
+     </SC.Container>
     )
 }

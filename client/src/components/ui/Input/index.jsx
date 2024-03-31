@@ -1,9 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import * as SC from './styles'
 
-export const Input = ({ value, onChange, label, ...props }) => {
-    const [isFocused, setIsFocused] = useState(false);
-  
+export const Input = ({ value, onChange, ...props }) => {
     return (
       <SC.InputContainer>
         <SC.InputField

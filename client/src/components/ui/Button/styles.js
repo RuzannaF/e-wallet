@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Button = styled.button`
-  padding: 8px;
+  padding: 10px;
   box-sizing: border-box;
   border-radius: 10px;
   cursor: pointer;
@@ -13,9 +13,9 @@ export const Button = styled.button`
     cursor: not-allowed;
   }
   &.regular {
-    background: #f8f8f8; 
+    background: #fffff; 
     color: #333;
-    border-color: #f8f8f8;
+    border-color: #fffff;
   
     &:hover {
       background: #d9eaff; 
@@ -23,8 +23,12 @@ export const Button = styled.button`
   }
 
   &.primary {
-    background: #3498db; 
-    color: white; 
+    background: #63B1FF; 
+    color: white;
+    border: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: bold; 
   
     &:hover {
       background: #217dbb; 

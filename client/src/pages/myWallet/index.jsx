@@ -1,10 +1,35 @@
-import { Container } from "../../components/container"
-import { BalanceAdd } from "../../components/walletActions/BalanceAdd"
+import { useEffect } from 'react'
+import { Balance } from "../../components/balance"
+import { WalletActions } from "../../components/walletActions/actionsContainer"
+import { useDispatch, useSelector } from "react-redux"
+import { Loader } from "../../components/Loader"
+import { AuthWarning } from "../../authWarning"
+import { getBalance } from "../../redux/slices/BalanceSlice"
+import * as SC from './styles'
 
 export const MyWallet = () => {
-    return (
-        <Container>
-            <BalanceAdd />
-        </Container>
+    const { loading } = useSelector((state) => state.auth)
+    const { id, isActivated } = useSelector((state) => state.auth.user)
+    const { balance } = useSelector((state) => state.balance)
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if (id) {
+            dispatch(getBalance({ userId: id }))
+        }
+    }, [id, dispatch])
+
+    if ((!id || !isActivated) && !loading) {
+        return <AuthWarning />
+    }
+
+    return loading || !balance ? (
+        <Loader />
+    ) : (
+        <SC.Container>
+            <Balance />
+            <WalletActions />
+        </SC.Container>
     )
 }

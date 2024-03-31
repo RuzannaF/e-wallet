@@ -2,11 +2,9 @@ import styled from 'styled-components';
 
 export const InputContainer = styled.div`
   position: relative;
-  margin-bottom: 20px;
 `;
 
 export const InputField = styled.input`
-  width: 100%;
   padding: 10px;
   font-size: 16px;
   border: 1px solid #ccc;
@@ -21,4 +19,26 @@ export const InputField = styled.input`
   &:hover {
     border-color: #007bff;
   }
-`;
+  &.mediumInput {
+    width: 250px;
+
+    &::placeholder {
+      font-family: 'Manrope', sans-serif;
+      font-weight: light;
+      font-size: 18px;
+    }
+  }
+
+  &.smallInput {
+    width: 175px;
+
+    &::placeholder {
+      font-family: 'Manrope', sans-serif;
+      font-weight: light;
+      font-size: 12px;
+    }
+  }
+    &.errorInput {
+      border: 1px solid red;
+  }
+`

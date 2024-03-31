@@ -1,77 +1,85 @@
-const UserModel = require('../models/user-model')
-const bcrypt = require('bcrypt')
-const uuid = require('uuid')
-const mailService = require('./mail-service')
-const tokenService = require('./token-service')
-const UserDto = require('../dtos/user-dto')
-const ApiError = require('../exceptions/api-error')
+const UserModel = require('../models/user-model');
+const balanceModel = require('../models/balance-model');
+const transactionModel = require('../models/transaction-model');
+const bcrypt = require('bcrypt');
+const uuid = require('uuid');
+const mailService = require('./mail-service');
+const tokenService = require('./token-service');
+const balanceService = require('./balance-service');
+const UserDto = require('../dtos/user-dto');
+const ApiError = require('../exceptions/api-error');
 
 class UserService {
     async registration(email, password) {
-        const candidate = await UserModel.findOne({email}) //есть ли пользователь с таким email в коллекции
+        const candidate = await UserModel.findOne({email})
         if (candidate) {
-            throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`) // если email найден, пробрасываем ошибку
+            throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`)
         }
-        const hashPassword = await bcrypt.hash(password, 3) //хэшируем пароль при помощи bcrypt
-        const activationLink = uuid.v4() // генерируем ссылку для активации
+        const hashPassword = await bcrypt.hash(password, 3);
+        const activationLink = uuid.v4(); // v34fa-asfasf-142saf-sa-asf
 
-        const user = await UserModel.create({email, password: hashPassword, activationLink}) // создаем пользователя 
-        await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`) // отправляем ссылку для регистрации
+        const user = await UserModel.create({email, password: hashPassword, activationLink})
+        await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
 
-        const userDto = new UserDto(user) 
-        const tokens = tokenService.generateTokens({...userDto}) // генерация токена
-        await tokenService.saveToken(userDto.id, tokens.refreshToken) // сохраняем токен, созданный с помощью ф-ии из token-service
-
-        return {...tokens, user: userDto}
+        const userDto = new UserDto(user); // id, email, isActivated
+        const tokens = tokenService.generateTokens({...userDto});
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
+        const balance = await balanceModel.create({ user: userDto.id });
+        const transaction = await transactionModel.create({ user: userDto.id });
+        return { tokens, user: userDto, balance, transaction};
     }
 
-    async activate(activationLink) { // передаем ссылку, по которой переходит пользователь
-        const user = await UserModel.findOne({activationLink}) // ищем пользователя по переданной ссылке
-        if (!user) { // если нет юзера с такой ссылкой
+    async activate(activationLink) {
+        const user = await UserModel.findOne({activationLink})
+        if (!user) {
             throw ApiError.BadRequest('Неккоректная ссылка активации')
         }
-        user.isActivated = true // ссылка активирована
-        await user.save() // 
+        user.isActivated = true;
+        await user.save();
     }
 
     async login(email, password) {
-        const user = await UserModel.findOne({email}) // ищем пользователя с переданным email
-        if (!user) { 
+        const user = await UserModel.findOne({email})
+        if (!user) {
             throw ApiError.BadRequest('Пользователь с таким email не найден')
         }
-        const isPassEquals = await bcrypt.compare(password, user.password) // сравниваем хэшируемый пароль с паролем из запроса
+        const isPassEquals = await bcrypt.compare(password, user.password);
         if (!isPassEquals) {
-            throw ApiError.BadRequest('Неверный пароль')
+            throw ApiError.BadRequest('Неверный пароль');
         }
-        const userDto = new UserDto(user)
-        const tokens = tokenService.generateTokens({...userDto})
+        const userDto = new UserDto(user);
+        const tokens = tokenService.generateTokens({...userDto});
 
-        await tokenService.saveToken(userDto.id, tokens.refreshToken)
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
         return {...tokens, user: userDto}
     }
 
     async logout(refreshToken) {
-        const token = await tokenService.removeToken(refreshToken) // удаляем токен
-        return token
+        const token = await tokenService.removeToken(refreshToken);
+        return token;
     }
 
     async refresh(refreshToken) {
         if (!refreshToken) {
-            throw ApiError.UnauthorizedError()
+            throw ApiError.UnauthorizedError();
         }
-        const userData = tokenService.validateRefreshToken(refreshToken)
-        const tokenFromDb = await tokenService.findToken(refreshToken)
+        const userData = tokenService.validateRefreshToken(refreshToken);
+        const tokenFromDb = await tokenService.findToken(refreshToken);
         if (!userData || !tokenFromDb) {
-            throw ApiError.UnauthorizedError()
+            throw ApiError.UnauthorizedError();
         }
-        const user = await UserModel.findById(userData.id)
-        const userDto = new UserDto(user)
-        const tokens = tokenService.generateTokens({...userDto})
+        const user = await UserModel.findById(userData.id);
+        const userDto = new UserDto(user);
+        const tokens = tokenService.generateTokens({...userDto});
 
-        await tokenService.saveToken(userDto.id, tokens.refreshToken)
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
         return {...tokens, user: userDto}
     }
 
+    async getAllUsers() {
+        const users = await UserModel.find();
+        return users;
+    }
 }
 
 module.exports = new UserService();
