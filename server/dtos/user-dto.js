@@ -1,5 +1,5 @@
 module.exports = class UserDto {
-    email; 
+    email;
     id;
     isActivated;
 
@@ -8,4 +8,4 @@ module.exports = class UserDto {
         this.id = model._id;
         this.isActivated = model.isActivated;
     }
-} 
+}

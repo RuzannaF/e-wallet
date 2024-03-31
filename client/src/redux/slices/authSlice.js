@@ -1,18 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authApi } from '../../api/authApi';
-import axios from 'axios';
 
 export const registration = createAsyncThunk(
   'auth/registrateUser',
-  async ({ email, password }) => {
-    return await authApi.registration({ email, password });
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      return await authApi.registration({ email, password })
+    } catch (error) {
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
 export const login = createAsyncThunk(
   'auth/loginUser',
-  async ({ email, password }) => {
-    return await authApi.login({ email, password });
+  async ({ email, password }, { rejectWithValue }) => {
+    try {
+      return await authApi.login({ email, password })
+    } catch (error) {
+      return rejectWithValue(error.response.data)
+    }
   }
 )
 
@@ -31,40 +38,81 @@ export const checkAuth = createAsyncThunk(
 )
 
 const initialState = {
-  user: null,
+  user: {
+    id: null,
+    isActivated: false,
+  },
   isAuth: false,
   loading: false,
+  error: {
+    login: null,
+    registration: null,
+  },
 }
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {},
+  reducers: {
+    clearError: (state) => {
+      state.error = {
+        login: null,
+        registration: null,
+      };
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state) => {
         state.loading = true;
+        state.error = {
+          login: null,
+          registration: null,
+        };
       })
       .addCase(login.fulfilled, (state, action) => {
         localStorage.setItem('token', action.payload.accessToken)
         state.loading = false;
         state.isAuth = true;
         state.user = action.payload.user;
+        state.error = {
+          login: null,
+          registration: null,
+        };
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.isAuth = false;
+        state.user = {
+          id: null,
+          isActivated: false,
+        };
+        state.error.login = action.payload;
       })
       .addCase(registration.pending, (state) => {
         state.loading = true;
+        state.error = {
+          login: null,
+          registration: null,
+        };
       })
       .addCase(registration.fulfilled, (state, action) => {
         localStorage.setItem('token', action.payload.accessToken)
         state.loading = false;
-        state.isAuth = true;
         state.user = action.payload.user;
+        state.error = {
+          login: null,
+          registration: null,
+        };
       })
       .addCase(registration.rejected, (state, action) => {
         state.loading = false;
-        state.isAuth = false; // Устанавливаем флаг авторизации в false
-        state.user = null; // Сбрасываем пользователя
-        console.error('Ошибка при регистрации:', action.error.message); // Выводим ошибку в консоль
+        state.isAuth = false;
+        state.user = {
+          id: null,
+          isActivated: false,
+        };
+        state.error.registration = action.payload;
       })
       .addCase(logout.pending, (state) => {
         state.loading = true;
@@ -73,7 +121,14 @@ const authSlice = createSlice({
         localStorage.removeItem('token');
         state.loading = false;
         state.isAuth = false;
-        state.user = null;
+        state.user = {
+          id: null,
+          isActivated: false,
+        };
+        state.error = {
+          login: null,
+          registration: null,
+        };
       })
       .addCase(checkAuth.pending, (state) => {
         state.loading = true;
@@ -83,8 +138,26 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuth = true;
         state.user = action.payload.user;
-      });
+        state.error = {
+          login: null,
+          registration: null,
+        };
+      })
+      .addCase(checkAuth.rejected, (state, action) => {
+        state.loading = false;
+        state.isAuth = false;
+        state.user = {
+          id: null,
+          isActivated: false,
+        };
+        state.error = {
+          login: null,
+          registration: null,
+        };
+      })
   },
 });
+
+export const { clearError } = authSlice.actions
 
 export default authSlice.reducer;

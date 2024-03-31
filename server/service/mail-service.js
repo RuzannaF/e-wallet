@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
 
 class MailService {
 
@@ -23,7 +23,7 @@ class MailService {
             html:
                 `
                     <div>
-                        <h1>Для активации перейдите по ссылке</h1>
+                        <h1>Для активации авторизуйтесь по ссылке</h1>
                         <a href="${link}">${link}</a>
                     </div>
                 `
@@ -31,4 +31,4 @@ class MailService {
     }
 }
 
-module.exports = new MailService()
+module.exports = new MailService();

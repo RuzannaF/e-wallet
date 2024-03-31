@@ -8,6 +8,7 @@ const errorMiddleware = require('./middlewares/error-middleware');
 
 const PORT = process.env.PORT || 3001;
 const app = express()
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 app.use(express.json());
 app.use(cookieParser());
@@ -20,7 +21,7 @@ app.use(errorMiddleware);
 
 const start = async () => {
     try {
-        await mongoose.connect(process.env.DB_CONNECT, {
+        await mongoose.connect(process.env.DB_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         })

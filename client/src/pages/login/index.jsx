@@ -1,21 +1,24 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { login } from "../../redux/slices/authSlice"
+import { clearError, login } from "../../redux/slices/AuthSlice"
 import { Form } from '../../components/Form'
-import { Title } from '../../components/Title'
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { useNavigate } from "react-router-dom";
+import { Loader } from "../../components/Loader";
+import * as SC from './styles'
 
 export const LoginPage = () => {
 
-    const [formValues, setFormValues] = useState({email: '', password: ''})
+    const [formValues, setFormValues] = useState({ email: '', password: '' })
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
-    const { user, isAuth} = useSelector((state) => state.auth)
+    const { isAuth, error } = useSelector((state) => state.auth)
 
     const onChange = (name, value) => {
-        setFormValues({...formValues, [name]: value})
+        setFormValues({ ...formValues, [name]: value })
     }
 
     const onSubmit = (e) => {
@@ -24,27 +27,39 @@ export const LoginPage = () => {
         dispatch(login({ email, password }));
     }
 
-    return (
-        <>
-        <Title>Авторизация</Title>
-        <Form onSubmit={onSubmit}>
-            <Input
-                type="email"
-                name='email'
-                placeholder='email'
-                value={formValues.email}
-                onChange={(e) => onChange(e.target.name, e.target.value)}
-            />
-            <Input
-                type="password"
-                placeholder='password'
-                name='password'
-                value={formValues.password}
-                onChange={(e) => onChange(e.target.name, e.target.value)}
-            />
-            
-            <Button type='submit' className='primary'>Войти в аккаунт</Button>
-        </Form>
-     </>
+    useEffect(() => {
+        if (isAuth) {
+            navigate('/wallet') 
+        } 
+        dispatch(clearError())
+    }, [isAuth, navigate, dispatch])
+
+    const disabled = !formValues.email || !formValues.password
+
+    return isAuth ? (
+        <Loader />
+    ) : (
+        <SC.Container>
+            <Form onSubmit={onSubmit}>
+                <SC.Title>Авторизация</SC.Title>
+                <Input
+                    type="email"
+                    name='email'
+                    placeholder='email'
+                    value={formValues.email}
+                    onChange={(e) => onChange(e.target.name, e.target.value)}
+                />
+                <Input
+                    type="password"
+                    placeholder='password'
+                    name='password'
+                    value={formValues.password}
+                    onChange={(e) => onChange(e.target.name, e.target.value)}
+                />
+                <Button type='submit' className='primary' disabled={disabled}>Войти в аккаунт</Button>
+                <SC.Text className='normal' onClick={() => navigate('/registration')}>Перейти на страницу регистрации</SC.Text>
+                {error.login && <SC.Text className='error'>{error.login}</SC.Text>}
+            </Form>
+        </SC.Container>
     )
 }
