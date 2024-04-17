@@ -1,9 +1,9 @@
 import { useState, useEffect} from 'react'
 import axios from 'axios';
-import { CurrencyRadio } from "../../CurrencyRadio"
-import { Button } from '../../ui/Button'
+import { CurrencyRadio } from "../../сurrencyRadio"
+import { Button } from '../../ui/button'
 import { useDispatch, useSelector } from 'react-redux'
-import { Input } from '../../ui/Input'
+import { Input } from '../../ui/input'
 import { convertCurrency } from "../../../redux/slices/BalanceSlice"
 import * as SC from './styles'
 import { Arrow } from '../../../svg/arrow';

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { clearError, registration } from "../../redux/slices/AuthSlice"
-import { Form } from '../../components/Form'
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { Form } from '../../components/form'
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import * as SC from './styles'
 
 export const RegistrationPage = () => {

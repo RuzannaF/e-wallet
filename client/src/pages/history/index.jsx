@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { getTransactions } from "../../redux/slices/BalanceSlice"
 import { ConvertTransaction } from "../../components/convertTransaction"
 import { AddTransaction } from "../../components/addTransaction"
-import { AuthWarning } from "../../authWarning"
-import { Loader } from "../../components/Loader"
+import { AuthWarning } from "../../components/authWarning"
+import { Loader } from "../../components/loader"
 import * as SC from './styles'
 
 export const History = () => {
