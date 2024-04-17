@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { CurrencyRadio } from "../../CurrencyRadio"
-import { Button } from "../../ui/Button"
-import { Input } from "../../ui/Input"
+import { CurrencyRadio } from "../../сurrencyRadio"
+import { Button } from "../../ui/button"
+import { Input } from "../../ui/input"
 import { addBalance } from "../../../redux/slices/BalanceSlice"
 import { useDispatch, useSelector } from 'react-redux'
 import * as SC from './styles'
@@ -35,7 +35,7 @@ export const BalanceAdd = () => {
         setMessage(`Вы пополнили баланс на ${amountToAdd} ${selectedCurrency}`)
     }
 
-    const disabled = message === 'Введите сумму цифровыми значениями' || !amountToAdd
+    const disabled = message === 'Введите сумму цифровыми значениями' || !amountToAdd || !selectedCurrency
 
     return (
         <SC.Container>

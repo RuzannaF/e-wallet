@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { clearError, login } from "../../redux/slices/AuthSlice"
-import { Form } from '../../components/Form'
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
+import { Form } from '../../components/form'
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { useNavigate } from "react-router-dom";
-import { Loader } from "../../components/Loader";
+import { Loader } from "../../components/loader";
 import * as SC from './styles'
 
 export const LoginPage = () => {

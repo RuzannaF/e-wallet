@@ -13,6 +13,9 @@ class BalanceService {
             if (amountToAdd <= 0) {
                 throw new Error('Нельзя пополнить баланс на 0');
             }
+            if (!currency) {
+                throw new Error('Не выбрана валюта');
+            }
             balanceData[currency] = currentBalance + Number(amountToAdd)
             return await balanceData.save();
         }

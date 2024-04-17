@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { BalanceAdd } from "../BalanceAdd";
-import { CurrencyConverter } from "../CurrencyConverter";
+import { BalanceAdd } from "../balanceAdd";
+import { CurrencyConverter } from "../currencyConverter";
 import * as SC from "./styles"
 
 

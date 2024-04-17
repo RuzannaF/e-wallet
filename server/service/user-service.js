@@ -16,17 +16,15 @@ class UserService {
             throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`)
         }
         const hashPassword = await bcrypt.hash(password, 3);
-        const activationLink = uuid.v4(); // v34fa-asfasf-142saf-sa-asf
+        const activationLink = uuid.v4(); 
 
         const user = await UserModel.create({email, password: hashPassword, activationLink})
         await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
 
-        const userDto = new UserDto(user); // id, email, isActivated
+        const userDto = new UserDto(user); 
         const tokens = tokenService.generateTokens({...userDto});
         await tokenService.saveToken(userDto.id, tokens.refreshToken);
-        const balance = await balanceModel.create({ user: userDto.id });
-        const transaction = await transactionModel.create({ user: userDto.id });
-        return { tokens, user: userDto, balance, transaction};
+        return { tokens, user: userDto};
     }
 
     async activate(activationLink) {
@@ -35,7 +33,11 @@ class UserService {
             throw ApiError.BadRequest('Неккоректная ссылка активации')
         }
         user.isActivated = true;
+        const userDto = new UserDto(user);
+        const balance = await balanceModel.create({ user: userDto.id });
+        const transaction = await transactionModel.create({ user: userDto.id });
         await user.save();
+        return {balance, transaction, user: userDto}
     }
 
     async login(email, password) {
@@ -74,11 +76,6 @@ class UserService {
 
         await tokenService.saveToken(userDto.id, tokens.refreshToken);
         return {...tokens, user: userDto}
-    }
-
-    async getAllUsers() {
-        const users = await UserModel.find();
-        return users;
     }
 }
 

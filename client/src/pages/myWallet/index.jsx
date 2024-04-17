@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { Balance } from "../../components/balance"
 import { WalletActions } from "../../components/walletActions/actionsContainer"
 import { useDispatch, useSelector } from "react-redux"
-import { Loader } from "../../components/Loader"
-import { AuthWarning } from "../../authWarning"
+import { Loader } from "../../components/loader"
+import { AuthWarning } from "../../components/authWarning"
 import { getBalance } from "../../redux/slices/BalanceSlice"
 import * as SC from './styles'
 
