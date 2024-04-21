@@ -4,7 +4,7 @@ import { WalletActions } from "../../components/walletActions/actionsContainer"
 import { useDispatch, useSelector } from "react-redux"
 import { Loader } from "../../components/loader"
 import { AuthWarning } from "../../components/authWarning"
-import { getBalance } from "../../redux/slices/BalanceSlice"
+import { getBalance } from "../../redux/slices/balanceSlice"
 import * as SC from './styles'
 
 export const MyWallet = () => {
