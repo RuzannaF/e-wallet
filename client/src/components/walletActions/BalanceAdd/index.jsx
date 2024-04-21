@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CurrencyRadio } from "../../сurrencyRadio"
 import { Button } from "../../ui/button"
 import { Input } from "../../ui/input"
-import { addBalance } from "../../../redux/slices/BalanceSlice"
+import { addBalance } from "../../../redux/slices/balanceSlice"
 import { useDispatch, useSelector } from 'react-redux'
 import * as SC from './styles'
 

@@ -4,7 +4,7 @@ import { CurrencyRadio } from "../../сurrencyRadio"
 import { Button } from '../../ui/button'
 import { useDispatch, useSelector } from 'react-redux'
 import { Input } from '../../ui/input'
-import { convertCurrency } from "../../../redux/slices/BalanceSlice"
+import { convertCurrency } from "../../../redux/slices/balanceSlice"
 import * as SC from './styles'
 import { Arrow } from '../../../svg/arrow';
 import { calculateAmount } from '../../../helpers/calculateAmount';

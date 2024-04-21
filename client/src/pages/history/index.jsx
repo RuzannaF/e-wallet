@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { getTransactions } from "../../redux/slices/BalanceSlice"
+import { getTransactions } from "../../redux/slices/balanceSlice"
 import { ConvertTransaction } from "../../components/convertTransaction"
 import { AddTransaction } from "../../components/addTransaction"
 import { AuthWarning } from "../../components/authWarning"

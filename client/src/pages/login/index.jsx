@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { clearError, login } from "../../redux/slices/AuthSlice"
+import { clearError, login } from "../../redux/slices/authSlice"
 import { Form } from '../../components/form'
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';

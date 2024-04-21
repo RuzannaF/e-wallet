@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth, logout } from '../../redux/slices/AuthSlice';
+import { checkAuth, logout } from '../../redux/slices/authSlice';
 import * as SC from './styles'
 
 export const Root = () => {
