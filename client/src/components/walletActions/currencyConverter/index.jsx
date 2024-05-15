@@ -5,13 +5,13 @@ import { Button } from '../../ui/button'
 import { useDispatch, useSelector } from 'react-redux'
 import { Input } from '../../ui/input'
 import { convertCurrency } from "../../../redux/slices/balanceSlice"
-import * as SC from './styles'
 import { Arrow } from '../../../svg/arrow';
 import { calculateAmount } from '../../../helpers/calculateAmount';
+import * as SC from './styles'
 
 const getRates = (async (baseCurrency, targetCurrency) => {
     const response = await axios.get(`https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_uxrU3VolOLAaPnWrOhTBebNABoSz1vHD7YE7jKsc&currencies=${targetCurrency.toUpperCase()}&base_currency=${baseCurrency.toUpperCase()}`)
-    const dataRates = Math.ceil(Number(response.data.data[targetCurrency.toUpperCase()]) * 100) / 100
+    const dataRates = Number(response.data.data[targetCurrency.toUpperCase()])
     return dataRates
 })
 
@@ -33,11 +33,6 @@ export const CurrencyConverter = () => {
             setBaseAmount('')
             setTargetAmount('')
             setMessage('Введите сумму пополнения цифрами')
-            return
-        }
-        if (Number(amount) === 0) {
-            setBaseAmount('')
-            setTargetAmount('')
             return
         }
         if (targetCurrency && baseCurrency) {
@@ -92,6 +87,8 @@ export const CurrencyConverter = () => {
 
     const convertSelectedCurrency = () => {
         dispatch(convertCurrency({ baseCurrency: baseCurrency, targetCurrency: targetCurrency, amountToBuy: targetAmount, userId: id }))
+        setTargetAmount('')
+        setBaseAmount('')
         setMessage('Конвертация прошла успешно')
     }
     const handleCurrencyChange = (currency, setter) => {

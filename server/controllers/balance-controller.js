@@ -37,8 +37,8 @@ class BalanceController {
 
     async getTransactions(req, res, next) {
         try {
-            const userId  = req.query.userId;
-            const transactions = await transactionService.getUserTransactions(userId);
+            const { userId, transactionType, sortByDate } = req.query;
+            const transactions = await transactionService.getUserTransactions(userId, transactionType, sortByDate);
             return res.json(transactions);
         } catch (e) {
             next(e);

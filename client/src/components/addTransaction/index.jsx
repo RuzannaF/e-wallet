@@ -3,14 +3,22 @@ import { formatDate } from "../../helpers/formatDate"
 import * as SC from './styles'
 
 export const AddTransaction = ({ index }) => {
-    const transaction = useSelector((state) => state.balance.transactions[index])
 
-    const formattedDate = formatDate(transaction.transactionDate)
+    const formattedDate = formatDate(index.transactionDate)
+
+    const transactionType = index.currency ? 'add' : 'convert'
+
     return (
-        <SC.Container>
-            <SC.Title>Пополение</SC.Title>
-            <SC.Date>{formattedDate}</SC.Date>
-            <SC.Currency>+{transaction.addCurrency} {transaction.currency}</SC.Currency>
+        transactionType === 'add' ? (
+            <SC.Container>
+                <SC.Title>Пополнение</SC.Title>
+                <SC.Date>{formattedDate}</SC.Date>
+                <SC.Currency>+{index.addCurrency} {index.currency}</SC.Currency>
+            </SC.Container>
+        ) : <SC.Container>
+            <SC.Title>Конвертация</SC.Title>
+            <SC.Date>{formattedDate} по курсу 1 {index.baseCurrency} = {Math.ceil(index.rates * 100) / 100} {index.targetCurrency}</SC.Date>
+            <SC.Currency>+{index.targetAmount} {index.targetCurrency} </SC.Currency>
         </SC.Container>
     )
 }
