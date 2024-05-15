@@ -31,9 +31,23 @@ class TransactionService {
         }
     }
 
-    async getUserTransactions(userId) {
+    async getUserTransactions(userId, transactionType, sortByDate) {
         const transactions = await TransactionModel.findOne({ user: userId })
-        return transactions;
+        let filteredTransactions = transactions
+    
+        if (filteredTransactions) {
+            if (transactionType === 'addTransaction') {
+                filteredTransactions.transactions = filteredTransactions.transactions.filter(transaction => transaction.hasOwnProperty('currency'))
+            } else if (transactionType === 'convertTransaction') {
+                filteredTransactions.transactions = filteredTransactions.transactions.filter(transaction => transaction.hasOwnProperty('baseCurrency'))
+            }
+            if (sortByDate === 'newToOld') {
+                filteredTransactions.transactions.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate))
+            } else if (sortByDate === 'oldToNew') {
+                filteredTransactions.transactions.sort((a, b) => new Date(a.transactionDate) - new Date(b.transactionDate))
+            }
+            return filteredTransactions
+        }
     }
 }
 

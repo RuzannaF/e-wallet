@@ -10,8 +10,8 @@ export const getBalance = createAsyncThunk(
 
 export const getTransactions = createAsyncThunk(
     'balance/getUserTransactions',
-    async ({ userId }) => {
-        return await balanceApi.getTransactions({ userId });
+    async ({ userId, transactionType, sortByDate }) => {
+        return await balanceApi.getTransactions({ userId, transactionType, sortByDate });
     }
 )
 
@@ -70,6 +70,7 @@ const balanceSlice = createSlice({
             })
             .addCase(convertCurrency.fulfilled, (state, action) => {
                 state.loading = false;
+                console.log(action.payload)
                 const { usd, chf, cad, eur } = action.payload.balance;
                 state.balance = { usd, chf, cad, eur };
             })

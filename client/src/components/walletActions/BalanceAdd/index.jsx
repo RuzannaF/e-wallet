@@ -10,6 +10,7 @@ import * as SC from './styles'
 export const BalanceAdd = () => {
     const [selectedCurrency, setSelectedCurrency] = useState('')
     const [amountToAdd, setAmountToAdd] = useState('')
+    const [error, setError] = useState(false)
     const [message, setMessage] = useState(null)
 
     const { id } = useSelector((state) => state.auth.user)
@@ -24,11 +25,11 @@ export const BalanceAdd = () => {
             return
         }
         setMessage(null)
-        setAmountToAdd(amount)
+        setAmountToAdd(e.target.value)
     }
 
     const addAmount = () => {
-        if (amountToAdd === 0 || amountToAdd === '') {
+        if (amountToAdd === '0' || amountToAdd === '') {
             return setMessage('Вы пополнили баланс на 0, очень умно...')
         }
         dispatch(addBalance({ userId: id, currency: selectedCurrency, amountToAdd: amountToAdd }))
@@ -39,6 +40,7 @@ export const BalanceAdd = () => {
 
     return (
         <SC.Container>
+            <SC.Message>Выберите валюту:</SC.Message>
             <CurrencyRadio selectedCurrency={selectedCurrency} setSelectedCurrency={setSelectedCurrency} />
             <Input
                 type="text"
@@ -48,7 +50,7 @@ export const BalanceAdd = () => {
                 onChange={changeAmount}
                 className='mediumInput'
             />
-            {message && <SC.Message>{message}</SC.Message>}
+            {message && <SC.Message className={error ? 'error' : ''}>{message}</SC.Message>}
             <Button onClick={addAmount} className='primary' disabled={disabled}>Пополнить</Button>
         </SC.Container>
     )

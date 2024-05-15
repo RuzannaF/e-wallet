@@ -6,6 +6,7 @@ export const ConvertTransaction = ({ index }) => {
     const transaction = useSelector((state) => state.balance.transactions[index])
 
     const formattedDate = formatDate(transaction.transactionDate)
+    
     return (
         <SC.Container>
             <SC.Title>Конвертация</SC.Title>

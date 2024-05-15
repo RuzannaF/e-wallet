@@ -9,9 +9,9 @@ export const balanceApi = {
             throw error
         }
     },
-    async getTransactions({ userId }) {
+    async getTransactions({ userId, transactionType, sortByDate }) {
         try {
-            const response = await $api.get(`/getTransactions?userId=${userId}`)
+            const response = await $api.get(`/getTransactions?userId=${userId}&transactionType=${transactionType}&sortByDate=${sortByDate}`)
             return response.data
         } catch (error) {
             throw error
