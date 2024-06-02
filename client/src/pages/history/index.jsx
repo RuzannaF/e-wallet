@@ -38,7 +38,7 @@ export const History = () => {
                 <option value="addTransaction">Пополнение</option>
             </Select>
             {transactions && transactions.map(
-                (index) => <AddTransaction key={index.transactionDate} index={index} />
+                (transaction) => <AddTransaction key={transaction.transactionDate} transaction={transaction} />
             )}
         </SC.Container>
     )

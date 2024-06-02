@@ -1,5 +1,4 @@
 import { useState, useEffect} from 'react'
-import axios from 'axios';
 import { CurrencyRadio } from "../../сurrencyRadio"
 import { Button } from '../../ui/button'
 import { useDispatch, useSelector } from 'react-redux'
@@ -8,12 +7,8 @@ import { convertCurrency } from "../../../redux/slices/balanceSlice"
 import { Arrow } from '../../../svg/arrow';
 import { calculateAmount } from '../../../helpers/calculateAmount';
 import * as SC from './styles'
-
-const getRates = (async (baseCurrency, targetCurrency) => {
-    const response = await axios.get(`https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_uxrU3VolOLAaPnWrOhTBebNABoSz1vHD7YE7jKsc&currencies=${targetCurrency.toUpperCase()}&base_currency=${baseCurrency.toUpperCase()}`)
-    const dataRates = Number(response.data.data[targetCurrency.toUpperCase()])
-    return dataRates
-})
+import { validateAmount } from '../../../helpers/validateAmount';
+import { getRates } from '../../../helpers/getRates';
 
 export const CurrencyConverter = () => {
     const [baseCurrency, setBaseCurrency] = useState('')
@@ -22,6 +17,7 @@ export const CurrencyConverter = () => {
     const [targetCurrency, setTargetCurrency] = useState('')
     const [rates, setRates] = useState('')
     const [message, setMessage] = useState(null)
+    const [error, setError] = useState(false)
 
     const dispatch = useDispatch()
     const { id } = useSelector((state) => state.auth.user)
@@ -29,18 +25,20 @@ export const CurrencyConverter = () => {
 
     const changeAmount = (e, setter) => {
         const amount = e.target.value
-        if (isNaN(amount)) {
-            setBaseAmount('')
-            setTargetAmount('')
-            setMessage('Введите сумму пополнения цифрами')
+        const isAmountValid = validateAmount(amount)
+        if(!isAmountValid) {
+            setMessage('Некорректный ввод')
+            setError(true)
             return
         }
         if (targetCurrency && baseCurrency) {
             if (setter === setBaseAmount) {
                 if (amount > balance[baseCurrency]) {
                     setMessage('Недостаточно валюты для перевода')
+                    setError(true)
                 } else {
                     setMessage(null)
+                    setError(false)
                 }
                 const newTargetAmount = calculateAmount(rates, 'target', amount)
                 setTargetAmount(newTargetAmount)
@@ -48,14 +46,17 @@ export const CurrencyConverter = () => {
                 const newBaseAmount = calculateAmount(rates, 'base', amount)
                 if (newBaseAmount > balance[baseCurrency]) {
                     setMessage('Недостаточно валюты для перевода')
+                    setError(true)
                 } else {
                     setMessage(null)
+                    setError(false)
                 }
                 setBaseAmount(newBaseAmount)
             }
             setter(amount)
         } else {
             setMessage('Выберите валюту')
+            setError(true)
         }
     }
 
@@ -90,6 +91,7 @@ export const CurrencyConverter = () => {
         setTargetAmount('')
         setBaseAmount('')
         setMessage('Конвертация прошла успешно')
+        setError(false)
     }
     const handleCurrencyChange = (currency, setter) => {
         setter(currency)
@@ -106,41 +108,38 @@ export const CurrencyConverter = () => {
         }
     }
 
-    const disabled = message === 'Введите сумму пополнения цифрами' ||
-        message === 'Недостаточно валюты для перевода' ||
-        !baseAmount ||
-        !targetAmount
+    const disabled = error || !baseAmount || !targetAmount
 
     return (
         <SC.Container>
             <SC.Row>
                 <SC.Container>
-                    <CurrencyRadio selectedCurrency={baseCurrency} setSelectedCurrency={(currency) => handleCurrencyChange(currency, setBaseCurrency)} />
+                    <CurrencyRadio selectedCurrency={baseCurrency} setSelectedCurrency={(currency) => handleCurrencyChange(currency, setBaseCurrency)} highlight={message === 'Выберите валюту'} />
                     <Input
                         type="text"
                         name='baseAmount'
                         placeholder={baseCurrency}
                         value={baseAmount}
                         onChange={(e) => changeAmount(e, setBaseAmount)}
-                        className={`smallInput ${message === 'Введите сумму пополнения цифрами' || message === 'Недостаточно валюты для перевода' ? 'errorInput' : ''}`}
+                        className={`smallInput ${error && message ? 'errorInput' : ''}`}
                     />
                 </SC.Container>
                 <Arrow />
                 <SC.Container>
-                    <CurrencyRadio selectedCurrency={targetCurrency} setSelectedCurrency={(currency) => handleCurrencyChange(currency, setTargetCurrency)} />
+                    <CurrencyRadio selectedCurrency={targetCurrency} setSelectedCurrency={(currency) => handleCurrencyChange(currency, setTargetCurrency)} highlight={message === 'Выберите валюту'} />
                     <Input
                         type="text"
                         name='baseAmount'
                         placeholder={targetCurrency}
                         value={targetAmount}
                         onChange={(e) => changeAmount(e, setTargetAmount)}
-                        className={`smallInput ${message === 'Введите сумму пополнения цифрами' || message === 'Недостаточно валюты для перевода' ? 'errorInput' : ''}`}
+                        className={`smallInput ${error && message ? 'errorInput' : ''}`}
                     />
                 </SC.Container>
             </SC.Row>
             {rates ? <SC.Message>1 {baseCurrency} = {rates} {targetCurrency}</SC.Message> : <br />}
             <Button disabled={disabled} className='primary' onClick={convertSelectedCurrency}>Конвертировать</Button>
-            {message && <SC.Message>{message}</SC.Message>}
+            {message && <SC.Message className={error ? 'error' : ''}>{message}</SC.Message>}
         </SC.Container>
     )
 }

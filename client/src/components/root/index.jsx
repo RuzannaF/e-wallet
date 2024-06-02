@@ -10,9 +10,7 @@ export const Root = () => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        if (localStorage.getItem('token')) {
-            dispatch(checkAuth())
-        }
+        dispatch(checkAuth())
     }, [dispatch])
 
     const exitButton = () => {
@@ -25,7 +23,7 @@ export const Root = () => {
                 <SC.SidebarLink to="/wallet">Мой кошелек</SC.SidebarLink>
                 <SC.SidebarLink to="/history">История</SC.SidebarLink>
                 {id && isActivated && <SC.Exit onClick={exitButton}>Выйти из аккаунта</SC.Exit>}
-                {!isActivated && <SC.SidebarLink to="/">Авторизация</SC.SidebarLink>}
+                <SC.SidebarLink to="/">Авторизация</SC.SidebarLink>
             </SC.Sidebar>
             <SC.Content>
                 <Outlet />
