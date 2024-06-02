@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components"
+import styled, { keyframes, css } from "styled-components"
 
 const fadeIn = keyframes`
   from {
@@ -34,17 +34,20 @@ export const Action = styled.h1`
     border-radius: 20px;
     padding: 15px 20px;
 
-    &:hover {
-        animation: ${fadeIn} 0.3s forwards;
-        color: white;
-    }
     ${({ selected }) =>
-    selected &&
-    `
-    background-color: #63B1FF;
-    border-radius: 20px;
-    color: white;
-`}
+      selected
+        ? css`
+            background-color: #63B1FF;
+            border-radius: 20px;
+            color: white;
+            pointer-events: none; 
+          `
+        : css`
+            &:hover {
+              animation: ${fadeIn} 0.3s forwards;
+              color: white;
+            }
+          `}
 `
 export const ActionItemContainer = styled.div`
     padding: 10px; 

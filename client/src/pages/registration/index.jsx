@@ -1,57 +1,49 @@
-import { useEffect, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { clearError, registration } from "../../redux/slices/authSlice"
-import { Form } from '../../components/form'
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
+import { useDispatch, useSelector } from "react-redux";
+import { clearError, registration } from "../../redux/slices/authSlice";
+import { useEffect, useState } from "react";
+import { AuthForm } from "../../components/authForm";
+import { useNavigate } from "react-router-dom";
 import * as SC from './styles'
 
 export const RegistrationPage = () => {
-
-    const [formValues, setFormValues] = useState({email: '', password: ''})
-
     const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const { user, error, isAuth, loading } = useSelector((state) => state.auth);
+    const [showActivationMessage, setShowActivationMessage] = useState(false);
 
-    const { user, error} = useSelector((state) => state.auth)
+    useEffect(() => {
+        if (user.id && !user.isActivated) {
+            setShowActivationMessage(true)
+        } else if (isAuth) {
+            navigate('/wallet')
+        }
+        dispatch(clearError())
+    }, [isAuth, navigate, dispatch])
 
     useEffect(() => {
         dispatch(clearError())
     }, [dispatch])
 
-    const onChange = (name, value) => {
-        setFormValues({...formValues, [name]: value})
-    }
-
-    const onSubmit = (e) => {
-        e.preventDefault()
+    const handleRegistration = (dispatch, formValues) => {
         const { email, password } = formValues
         dispatch(registration({ email, password }))
     }
 
-    const disabled = !formValues.email || formValues.password.length <= 3
-
     return (
-        <SC.Container>
-        <Form onSubmit={onSubmit}>
-        <SC.Title>Регистрация</SC.Title>
-            <Input
-                type="email"
-                name='email'
-                placeholder='email'
-                value={formValues.email}
-                onChange={(e) => onChange(e.target.name, e.target.value)}
+        <>
+            <AuthForm
+                title="Регистрация"
+                buttonText="Зарегистрироваться"
+                onSubmit={handleRegistration}
+                isAuth={isAuth}
+                loading={loading}
+                error={error.registration}
+                navigateTo="/wallet"
+                onNavigate={navigate}
+                message={
+                    showActivationMessage && <SC.Text className='normal'>Для завершения регистрации перейдите по ссылке из письма в почте</SC.Text>
+                }
             />
-            <Input
-                type="password"
-                placeholder='password'
-                name='password'
-                value={formValues.password}
-                onChange={(e) => onChange(e.target.name, e.target.value)}
-            />
-            <Button type='submit' className='primary' disabled={disabled}>Зарегистрироваться</Button>
-            {user.id && !user.isActivated && <SC.Text className='normal'>Для завершения регистрации перейдите по ссылке из письма в почте</SC.Text>}
-            {error.registration && <SC.Text className='error'>{error.registration}</SC.Text>}
-        </Form>
-     </SC.Container>
+        </>
     )
 }

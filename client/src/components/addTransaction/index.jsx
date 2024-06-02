@@ -1,24 +1,17 @@
-import { useSelector } from "react-redux"
-import { formatDate } from "../../helpers/formatDate"
-import * as SC from './styles'
+import { formatDate } from "../../helpers/formatDate";
+import { transactionTemplates } from "./transactionTemplates";
+import * as SC from './styles';
 
-export const AddTransaction = ({ index }) => {
-
-    const formattedDate = formatDate(index.transactionDate)
-
-    const transactionType = index.currency ? 'add' : 'convert'
+export const AddTransaction = ({ transaction }) => {
+    const formattedDate = formatDate(transaction.transactionDate)
+    const transactionType = transaction.currency ? 'add' : 'convert'
+    const template = transactionTemplates[transactionType]
 
     return (
-        transactionType === 'add' ? (
-            <SC.Container>
-                <SC.Title>Пополнение</SC.Title>
-                <SC.Date>{formattedDate}</SC.Date>
-                <SC.Currency>+{index.addCurrency} {index.currency}</SC.Currency>
-            </SC.Container>
-        ) : <SC.Container>
-            <SC.Title>Конвертация</SC.Title>
-            <SC.Date>{formattedDate} по курсу 1 {index.baseCurrency} = {Math.ceil(index.rates * 100) / 100} {index.targetCurrency}</SC.Date>
-            <SC.Currency>+{index.targetAmount} {index.targetCurrency} </SC.Currency>
+        <SC.Container>
+            <SC.Title>{template.title}</SC.Title>
+            <SC.Date>{template.getDateText(formattedDate, transaction)}</SC.Date>
+            <SC.Currency>{template.getCurrencyText(transaction)}</SC.Currency>
         </SC.Container>
     )
 }

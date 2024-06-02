@@ -5,6 +5,7 @@ import { Input } from "../../ui/input"
 import { addBalance } from "../../../redux/slices/balanceSlice"
 import { useDispatch, useSelector } from 'react-redux'
 import * as SC from './styles'
+import { validateAmount } from '../../../helpers/validateAmount'
 
 
 export const BalanceAdd = () => {
@@ -18,14 +19,16 @@ export const BalanceAdd = () => {
     const dispatch = useDispatch()
 
     const changeAmount = (e) => {
-        const amount = Number(e.target.value)
-        if (isNaN(amount)) {
-            setAmountToAdd('')
-            setMessage('Введите сумму цифровыми значениями')
-            return
+        const amount = e.target.value
+        const isAmountValid = validateAmount(amount)
+        if (isAmountValid) {
+            setAmountToAdd(amount)
+            setMessage(null)
+            setError(false)
+        } else {
+            setMessage('Некорректный ввод')
+            setError(true)
         }
-        setMessage(null)
-        setAmountToAdd(e.target.value)
     }
 
     const addAmount = () => {
@@ -33,25 +36,39 @@ export const BalanceAdd = () => {
             return setMessage('Вы пополнили баланс на 0, очень умно...')
         }
         dispatch(addBalance({ userId: id, currency: selectedCurrency, amountToAdd: amountToAdd }))
+        setError(false)
         setMessage(`Вы пополнили баланс на ${amountToAdd} ${selectedCurrency}`)
     }
 
-    const disabled = message === 'Введите сумму цифровыми значениями' || !amountToAdd || !selectedCurrency
+    const disabled = message === 'Некорректный ввод' || !amountToAdd || !selectedCurrency
+
+    const buttonError = () => {
+        if (!selectedCurrency) {
+            setMessage('Пожалуйста, выберите валюту')
+            setError(true)
+        } else if (!amountToAdd) {
+            setMessage('Пожалуйста, введите сумму')
+            setError(true)
+        }
+    }
 
     return (
         <SC.Container>
             <SC.Message>Выберите валюту:</SC.Message>
-            <CurrencyRadio selectedCurrency={selectedCurrency} setSelectedCurrency={setSelectedCurrency} />
+            <CurrencyRadio selectedCurrency={selectedCurrency} setSelectedCurrency={setSelectedCurrency} highlight={error && !selectedCurrency} />
             <Input
                 type="text"
                 name='amountToAdd'
                 placeholder='Введите сумму пополнения'
                 value={amountToAdd}
                 onChange={changeAmount}
-                className='mediumInput'
+                className={`mediumInput ${message === 'Пожалуйста, введите сумму' ? 'errorInput' : 0}` }
             />
             {message && <SC.Message className={error ? 'error' : ''}>{message}</SC.Message>}
-            <Button onClick={addAmount} className='primary' disabled={disabled}>Пополнить</Button>
+            <SC.ButtonWrapper>
+                <Button onClick={addAmount} className='primary' disabled={disabled}>Пополнить</Button>
+                {disabled && <SC.ErrorBlock onClick={buttonError} />}
+            </SC.ButtonWrapper>
         </SC.Container>
     )
 }

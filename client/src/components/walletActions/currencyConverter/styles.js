@@ -17,4 +17,7 @@ export const Message = styled.span`
     font-weight: regular;
     font-size: 15px;
     color: #666666;
+    &.error {
+        color: red;
+    }
 ` 

@@ -43,7 +43,7 @@ const initialState = {
     isActivated: false,
   },
   isAuth: false,
-  loading: false,
+  loading: true,
   error: {
     login: null,
     registration: null,
