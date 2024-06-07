@@ -23,7 +23,8 @@ export const Root = () => {
                 <SC.SidebarLink to="/wallet">Мой кошелек</SC.SidebarLink>
                 <SC.SidebarLink to="/history">История</SC.SidebarLink>
                 {id && isActivated && <SC.Exit onClick={exitButton}>Выйти из аккаунта</SC.Exit>}
-                <SC.SidebarLink to="/">Авторизация</SC.SidebarLink>
+                {(!id || !isActivated) && <SC.SidebarLink to="/">Авторизация</SC.SidebarLink>}
+                {!id && <SC.SidebarLink to="/registration">Регистрация</SC.SidebarLink>}
             </SC.Sidebar>
             <SC.Content>
                 <Outlet />
