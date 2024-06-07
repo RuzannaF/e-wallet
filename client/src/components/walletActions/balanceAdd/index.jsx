@@ -9,8 +9,8 @@ import { validateAmount } from '../../../helpers/validateAmount'
 
 
 export const BalanceAdd = () => {
-    const [selectedCurrency, setSelectedCurrency] = useState('')
-    const [amountToAdd, setAmountToAdd] = useState('')
+    const [selectedCurrency, setSelectedCurrency] = useState(null)
+    const [amountToAdd, setAmountToAdd] = useState(null)
     const [error, setError] = useState(false)
     const [message, setMessage] = useState(null)
 
@@ -32,24 +32,23 @@ export const BalanceAdd = () => {
     }
 
     const addAmount = () => {
-        if (amountToAdd === '0' || amountToAdd === '') {
-            return setMessage('Вы пополнили баланс на 0, очень умно...')
+        if (amountToAdd.trim() === '' || Number(amountToAdd) === 0) {
+            setMessage('Некорректный ввод')
+            setError(true)
+            return
+        }
+        if (!selectedCurrency) {
+            setMessage('Пожалуйста, выберите валюту')
+            setError(true)
+            return
+        } else if (!amountToAdd) {
+            setMessage('Пожалуйста, введите сумму')
+            setError(true)
+            return
         }
         dispatch(addBalance({ userId: id, currency: selectedCurrency, amountToAdd: amountToAdd }))
         setError(false)
         setMessage(`Вы пополнили баланс на ${amountToAdd} ${selectedCurrency}`)
-    }
-
-    const disabled = message === 'Некорректный ввод' || !amountToAdd || !selectedCurrency
-
-    const buttonError = () => {
-        if (!selectedCurrency) {
-            setMessage('Пожалуйста, выберите валюту')
-            setError(true)
-        } else if (!amountToAdd) {
-            setMessage('Пожалуйста, введите сумму')
-            setError(true)
-        }
     }
 
     return (
@@ -65,10 +64,7 @@ export const BalanceAdd = () => {
                 className={`mediumInput ${message === 'Пожалуйста, введите сумму' ? 'errorInput' : 0}` }
             />
             {message && <SC.Message className={error ? 'error' : ''}>{message}</SC.Message>}
-            <SC.ButtonWrapper>
-                <Button onClick={addAmount} className='primary' disabled={disabled}>Пополнить</Button>
-                {disabled && <SC.ErrorBlock onClick={buttonError} />}
-            </SC.ButtonWrapper>
+                <Button onClick={addAmount} className='primary'>Пополнить</Button>
         </SC.Container>
     )
 }

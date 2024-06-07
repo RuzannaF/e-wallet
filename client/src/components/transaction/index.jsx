@@ -2,7 +2,7 @@ import { formatDate } from "../../helpers/formatDate";
 import { transactionTemplates } from "./transactionTemplates";
 import * as SC from './styles';
 
-export const AddTransaction = ({ transaction }) => {
+export const Transaction = ({ transaction }) => {
     const formattedDate = formatDate(transaction.transactionDate)
     const transactionType = transaction.currency ? 'add' : 'convert'
     const template = transactionTemplates[transactionType]

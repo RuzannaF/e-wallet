@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { getTransactions } from "../../redux/slices/balanceSlice"
-import { AddTransaction } from "../../components/addTransaction"
+import { Transaction } from "../../components/transaction"
 import { AuthWarning } from "../../components/authWarning"
 import { Loader } from "../../components/loader"
 import * as SC from './styles'
@@ -38,7 +38,7 @@ export const History = () => {
                 <option value="addTransaction">Пополнение</option>
             </Select>
             {transactions && transactions.map(
-                (transaction) => <AddTransaction key={transaction.transactionDate} transaction={transaction} />
+                (transaction) => <Transaction key={transaction.transactionDate} transaction={transaction} />
             )}
         </SC.Container>
     )

@@ -6,7 +6,7 @@ import { Input } from '../ui/input';
 import { Loader } from "../loader";
 import * as SC from './styles';
 
-export const AuthForm = ({ title, buttonText, onSubmit, isAuth, loading, error, navigateTo, onNavigate, message }) => {
+export const AuthForm = ({ title, buttonText, onSubmit, error, message }) => {
     const [formValues, setFormValues] = useState({ email: '', password: '' })
     const dispatch = useDispatch();
 
@@ -15,19 +15,13 @@ export const AuthForm = ({ title, buttonText, onSubmit, isAuth, loading, error, 
     }
 
     const handleSubmit = (e) => {
-        e.preventDefault();
+        e.preventDefault()
         onSubmit(dispatch, formValues)
     }
 
-    useEffect(() => {
-        if (isAuth && navigateTo) {
-            onNavigate(navigateTo)
-        }
-    }, [isAuth, navigateTo, onNavigate])
-
     const disabled = !formValues.email || formValues.password.length <= 3
 
-    return (loading || isAuth) ? (<Loader />) : (
+    return (
         <SC.Container>
             <Form onSubmit={handleSubmit}>
                 <SC.Title>{title}</SC.Title>
