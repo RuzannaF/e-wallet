@@ -22,7 +22,7 @@ export const RegistrationPage = () => {
         dispatch(clearError())
     }, [dispatch])
 
-    const handleRegistration = (dispatch, formValues) => {
+    const handleRegistration = (formValues) => {
         const { email, password } = formValues
         dispatch(registration({ email, password }))
     }

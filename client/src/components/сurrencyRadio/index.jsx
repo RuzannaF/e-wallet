@@ -1,3 +1,4 @@
+import { CURRENCY_USD, CURRENCY_EUR, CURRENCY_CHF, CURRENCY_CAD } from "../../constants"
 import * as SC from "./styles"
 
 export const CurrencyRadio = ({ selectedCurrency, setSelectedCurrency, highlight }) => {
@@ -6,30 +7,28 @@ export const CurrencyRadio = ({ selectedCurrency, setSelectedCurrency, highlight
         setSelectedCurrency(currency)
     }
 
-    console.log(highlight)
-
     return (
         <SC.RadioContainer>
             <SC.RadioItem
-                checked={selectedCurrency === 'usd'}
-                onClick={() => handleCurrencyChange('usd')}
-                highlight={highlight}
-            ><SC.StyledText checked={selectedCurrency === 'usd'}>usd</SC.StyledText></SC.RadioItem>
+                checked={selectedCurrency === CURRENCY_USD}
+                onClick={() => handleCurrencyChange(CURRENCY_USD)}
+                $highlight={highlight}
+            ><SC.StyledText checked={selectedCurrency === CURRENCY_USD}>usd</SC.StyledText></SC.RadioItem>
             <SC.RadioItem
-                checked={selectedCurrency === 'cad'}
-                onClick={() => handleCurrencyChange('cad')}
-                highlight={highlight}
-            ><SC.StyledText checked={selectedCurrency === 'cad'}>cad</SC.StyledText></SC.RadioItem>
+                checked={selectedCurrency === CURRENCY_CAD}
+                onClick={() => handleCurrencyChange(CURRENCY_CAD)}
+                $highlight={highlight}
+            ><SC.StyledText checked={selectedCurrency === CURRENCY_CAD}>cad</SC.StyledText></SC.RadioItem>
             <SC.RadioItem
-                checked={selectedCurrency === 'eur'}
-                onClick={() => handleCurrencyChange('eur')}
-                highlight={highlight}
-            ><SC.StyledText checked={selectedCurrency === 'eur'}>eur</SC.StyledText></SC.RadioItem>
+                checked={selectedCurrency === CURRENCY_EUR}
+                onClick={() => handleCurrencyChange(CURRENCY_EUR)}
+                $highlight={highlight}
+            ><SC.StyledText checked={selectedCurrency === CURRENCY_EUR}>eur</SC.StyledText></SC.RadioItem>
             <SC.RadioItem
-                checked={selectedCurrency === 'chf'}
-                onClick={() => handleCurrencyChange('chf')}
-                highlight={highlight}
-            ><SC.StyledText checked={selectedCurrency === 'chf'}>chf</SC.StyledText></SC.RadioItem>
+                checked={selectedCurrency === CURRENCY_CHF}
+                onClick={() => handleCurrencyChange(CURRENCY_CHF)}
+                $highlight={highlight}
+            ><SC.StyledText checked={selectedCurrency === CURRENCY_CHF}>chf</SC.StyledText></SC.RadioItem>
         </SC.RadioContainer>
     )
 }

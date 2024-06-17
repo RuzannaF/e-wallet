@@ -9,7 +9,7 @@ export const LoginPage = () => {
     const dispatch = useDispatch()
     const { isAuth, error, loading } = useSelector((state) => state.auth)
 
-    const handleLogin = (dispatch, formValues) => {
+    const handleLogin = (formValues) => {
         const { email, password } = formValues
         dispatch(login({ email, password }))
     }

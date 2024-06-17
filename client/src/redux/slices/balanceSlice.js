@@ -70,7 +70,6 @@ const balanceSlice = createSlice({
             })
             .addCase(convertCurrency.fulfilled, (state, action) => {
                 state.loading = false;
-                console.log(action.payload)
                 const { usd, chf, cad, eur } = action.payload.balance;
                 state.balance = { usd, chf, cad, eur };
             })

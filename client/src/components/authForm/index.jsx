@@ -1,14 +1,11 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 import { Form } from '../form';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Loader } from "../loader";
 import * as SC from './styles';
 
 export const AuthForm = ({ title, buttonText, onSubmit, error, message }) => {
     const [formValues, setFormValues] = useState({ email: '', password: '' })
-    const dispatch = useDispatch();
 
     const onChange = (name, value) => {
         setFormValues({ ...formValues, [name]: value })
@@ -16,7 +13,7 @@ export const AuthForm = ({ title, buttonText, onSubmit, error, message }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        onSubmit(dispatch, formValues)
+        onSubmit(formValues)
     }
 
     const disabled = !formValues.email || formValues.password.length <= 3

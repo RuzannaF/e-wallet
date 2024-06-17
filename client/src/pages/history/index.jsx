@@ -4,8 +4,8 @@ import { getTransactions } from "../../redux/slices/balanceSlice"
 import { Transaction } from "../../components/transaction"
 import { AuthWarning } from "../../components/authWarning"
 import { Loader } from "../../components/loader"
-import * as SC from './styles'
 import { Select } from "../../components/ui/select"
+import * as SC from './styles'
 
 export const History = () => {
     const [sortByDate, setSortByDate] = useState("oldToNew");
