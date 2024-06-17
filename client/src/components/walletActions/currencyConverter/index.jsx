@@ -1,23 +1,19 @@
-import { useState, useEffect} from 'react'
-import { CurrencyRadio } from "../../сurrencyRadio"
+import { useState, useEffect } from 'react'
 import { Button } from '../../ui/button'
 import { useDispatch, useSelector } from 'react-redux'
-import { Input } from '../../ui/input'
 import { convertCurrency } from "../../../redux/slices/balanceSlice"
 import { Arrow } from '../../../svg/arrow';
 import { calculateAmount } from '../../../helpers/calculateAmount';
-import * as SC from './styles'
 import { validateAmount } from '../../../helpers/validateAmount';
 import { getRates } from '../../../helpers/getRates';
+import { CurrencyInput } from '../../currencyInput'
+import * as SC from './styles'
 
 export const CurrencyConverter = () => {
-    const [baseCurrency, setBaseCurrency] = useState('')
-    const [baseAmount, setBaseAmount] = useState('')
-    const [targetAmount, setTargetAmount] = useState('')
-    const [targetCurrency, setTargetCurrency] = useState('')
+    const [base, setBase] = useState({ amount: '', currency: '' })
+    const [target, setTarget] = useState({ amount: '', currency: '' })
     const [rates, setRates] = useState('')
-    const [message, setMessage] = useState(null)
-    const [error, setError] = useState(false)
+    const [notification, setNotification] = useState({ message: null, error: false })
 
     const dispatch = useDispatch()
     const { id } = useSelector((state) => state.auth.user)
@@ -25,121 +21,149 @@ export const CurrencyConverter = () => {
 
     const changeAmount = (e, setter) => {
         const amount = e.target.value
-        const isAmountValid = validateAmount(amount)
-        if(!isAmountValid) {
-            setMessage('Некорректный ввод')
-            setError(true)
-            return
-        }
-        if (targetCurrency && baseCurrency) {
-            if (setter === setBaseAmount) {
-                if (amount > balance[baseCurrency]) {
-                    setMessage('Недостаточно валюты для перевода')
-                    setError(true)
+        const valideAmount = validateAmount(amount)
+        if (valideAmount.isValid) { // только если сумма валидна, можно будет ее использовать для изменения инпута с другой суммой
+            if (target.currency && base.currency) {
+                if (setter === setBase) { // если пользователь ввел валюту из которой хочет перевести
+                    if (amount > balance[base.currency]) { // проверяем есть ли у него достаточная сумма на счету
+                        setNotification({ message: 'Недостаточно валюты для перевода', error: true })
+                    } else {
+                        setNotification({ message: null, error: false })
+                    }
+                    const newTargetAmount = calculateAmount(rates, 'target', amount) // считаем сколько будет той валюты, в которую хотят перевести
+                    setTarget(prevTarget => ({
+                        ...prevTarget,
+                        amount: newTargetAmount
+                    }))
                 } else {
-                    setMessage(null)
-                    setError(false)
+                    const newBaseAmount = calculateAmount(rates, 'base', amount) // считаем сколько пользователю нужно валюты на счету, чтобы купить желаемую валюту 
+                    if (newBaseAmount > balance[base.currency]) {
+                        setNotification({ message: 'Недостаточно валюты для перевода', error: true })
+                    } else {
+                        setNotification({ message: null, error: false })
+                    }
+                    setBase(prevBase => ({
+                        ...prevBase,
+                        amount: newBaseAmount
+                    }))
                 }
-                const newTargetAmount = calculateAmount(rates, 'target', amount)
-                setTargetAmount(newTargetAmount)
             } else {
-                const newBaseAmount = calculateAmount(rates, 'base', amount)
-                if (newBaseAmount > balance[baseCurrency]) {
-                    setMessage('Недостаточно валюты для перевода')
-                    setError(true)
-                } else {
-                    setMessage(null)
-                    setError(false)
-                }
-                setBaseAmount(newBaseAmount)
+                setNotification({ message: 'Выберите валюту', error: true }) // если не выбраны обе валюты, будет предупреждение
             }
-            setter(amount)
-        } else {
-            setMessage('Выберите валюту')
-            setError(true)
         }
+        setter(prevState => ({
+            ...prevState,
+            amount: amount
+        })) // даже если сумма не валидна, меняю значение инпута
     }
-
+    // этот useEffect нужен чтобы при выборе валюты, запрашивался новый курс для новой пары валют
     useEffect(() => {
         const fetchData = async () => {
-            if (baseCurrency && targetCurrency) {
+            if (base.currency && target.currency) {
                 try {
-                    const newRates = await getRates(baseCurrency, targetCurrency)
+                    const newRates = await getRates(base.currency, target.currency)
                     setRates(newRates)
-                    if (message === 'Выберите валюту') {
-                        setMessage(null)
+                    if (notification.message === 'Выберите валюту') { // если до этого была ошибка с выбором валюты, то убираю ее, тк по условию все валюты выбраны
+                        setNotification({ message: null, error: false })
                     }
                 } catch (error) {
                     console.error(error)
                 }
-            } else if (!baseAmount) {
-                setMessage(null)
-            }
+            } //else if (!base.amount) {
+            //setNotification({ message: null, error: false })
+            //}
         }
         fetchData()
-    }, [baseCurrency, targetCurrency])
+    }, [base.currency, target.currency])
 
+    // этот useEffect нужен чтобы при изменении курса пересчитывалcя target.amount
     useEffect(() => {
-        if (baseAmount && targetAmount) {
-            const newTargetAmount = calculateAmount(rates, 'target', baseAmount)
-            setTargetAmount(newTargetAmount)
+        if (base.amount && target.amount) {
+            const newTargetAmount = calculateAmount(rates, 'target', base.Amount)
+            setTarget(prevTarget => ({
+                ...prevTarget,
+                amount: newTargetAmount
+            }))
         }
     }, [rates])
 
     const convertSelectedCurrency = () => {
-        dispatch(convertCurrency({ baseCurrency: baseCurrency, targetCurrency: targetCurrency, amountToBuy: targetAmount, userId: id }))
-        setTargetAmount('')
-        setBaseAmount('')
-        setMessage('Конвертация прошла успешно')
-        setError(false)
+        // перед конвертацией проверяю валидность amount
+        const valideTargetAmount = validateAmount(target.amount)
+        const valideBaseAmount = validateAmount(base.amount)
+        console.log(valideTargetAmount, valideBaseAmount)
+        if (!valideTargetAmount.isValid || !valideBaseAmount.isValid) {
+            return setNotification({ message: 'Неккоректный ввод', error: true })
+        }
+        dispatch(convertCurrency({ baseCurrency: base.currency, targetCurrency: target.currency, amountToBuy: target.amount, userId: id }))
+        setTarget(prevTarget => ({
+            ...prevTarget,
+            amount: ''
+        }))
+        setBase(prevBase => ({
+            ...prevBase,
+            amount: ''
+        }))
+        setNotification({ message: 'Конвертация прошла успешно', error: false })
     }
+
     const handleCurrencyChange = (currency, setter) => {
-        setter(currency)
-        if (setter === setBaseCurrency && currency === targetCurrency) {
-            setTargetCurrency('')
+        setter(prevState => ({
+            ...prevState,
+            currency: currency
+        }))
+        // если пользователь меняет валюту на ту, что уже выбрана в другом инпуте, то сбрасывается все
+        // это сделано для того, чтобы нельзя было выбрать две одинаковые валюты
+        // и соотв. если выбрана только одна валюта, не будет курса и нельзя будет посчитать кол-во другой валюты, поэтому сбрасываю все amount
+        if (setter === setBase && currency === target.currency) {
+            setTarget({ amount: '', currency: '' })
+            setBase(prevBase => ({
+                ...prevBase,
+                amount: ''
+            }))
             setRates('')
-            setBaseAmount('')
-            setTargetAmount('')
-        } else if (setter === setTargetCurrency && currency === baseCurrency) {
-            setBaseCurrency('')
+        } else if (setter === setTarget && currency === base.currency) {
+            setBase({ amount: '', currency: '' })
+            setTarget(prevTarget => ({
+                ...prevTarget,
+                amount: ''
+            }))
             setRates('')
-            setBaseAmount('')
-            setTargetAmount('')
         }
     }
 
-    const disabled = error || !baseAmount || !targetAmount
+    const disabled = notification.error || !base.amount || !target.amount
 
     return (
         <SC.Container>
             <SC.Row>
                 <SC.Container>
-                    <CurrencyRadio selectedCurrency={baseCurrency} setSelectedCurrency={(currency) => handleCurrencyChange(currency, setBaseCurrency)} highlight={message === 'Выберите валюту'} />
-                    <Input
-                        type="text"
-                        name='baseAmount'
-                        placeholder={baseCurrency}
-                        value={baseAmount}
-                        onChange={(e) => changeAmount(e, setBaseAmount)}
-                        className={`smallInput ${error && message ? 'errorInput' : ''}`}
+                    <CurrencyInput
+                        currency="base"
+                        selectedCurrency={base.currency}
+                        setSelectedCurrency={(currency) => handleCurrencyChange(currency, setBase)}
+                        amount={base.amount}
+                        onChange={(e) => changeAmount(e, setBase, base.currency)}
+                        placeholder={base.currency}
+                        notification={notification}
                     />
                 </SC.Container>
                 <Arrow />
                 <SC.Container>
-                    <CurrencyRadio selectedCurrency={targetCurrency} setSelectedCurrency={(currency) => handleCurrencyChange(currency, setTargetCurrency)} highlight={message === 'Выберите валюту'} />
-                    <Input
-                        type="text"
-                        name='baseAmount'
-                        placeholder={targetCurrency}
-                        value={targetAmount}
-                        onChange={(e) => changeAmount(e, setTargetAmount)}
-                        className={`smallInput ${error && message ? 'errorInput' : ''}`}
+                    <CurrencyInput
+                        currency="target"
+                        selectedCurrency={target.currency}
+                        setSelectedCurrency={(currency) => handleCurrencyChange(currency, setTarget)}
+                        amount={target.amount}
+                        onChange={(e) => changeAmount(e, setTarget, target.currency)}
+                        placeholder={target.currency}
+                        notification={notification}
                     />
                 </SC.Container>
             </SC.Row>
-            {rates ? <SC.Message>1 {baseCurrency} = {rates} {targetCurrency}</SC.Message> : <br />}
+            {rates ? <SC.Message>1 {base.currency} = {rates} {target.currency}</SC.Message> : <br />}
             <Button disabled={disabled} className='primary' onClick={convertSelectedCurrency}>Конвертировать</Button>
-            {message && <SC.Message className={error ? 'error' : ''}>{message}</SC.Message>}
+            {notification.message && <SC.Message className={notification.error ? 'error' : ''}>{notification.message}</SC.Message>}
         </SC.Container>
     )
 }
