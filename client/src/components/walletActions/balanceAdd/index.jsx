@@ -49,7 +49,7 @@ export const BalanceAdd = () => {
                 placeholder='Введите сумму пополнения'
                 value={amountToAdd}
                 onChange={changeAmount}
-                className={`mediumInput ${notification.message === 'Пожалуйста, введите сумму' ? 'errorInput' : 0}`}
+                className={`mediumInput ${notification.message === 'Пожалуйста, введите сумму' ? 'errorInput' : ''}`}
             />
             {notification.message && <SC.Message className={notification.error ? 'error' : ''}>{notification.message}</SC.Message>}
             <Button onClick={addAmount} className='primary'>Пополнить</Button>
