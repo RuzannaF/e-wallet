@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { BalanceAdd } from "../balanceAdd";
-import { CurrencyConverter } from "../currencyConverter";
 import { TRANSACTION_ADD, TRANSACTION_CONVERT } from "../../../constants";
 import * as SC from "./styles"
+import { MyConverter } from "../../myConverter";
 
 
 export const WalletActions = () => {
@@ -19,7 +19,7 @@ export const WalletActions = () => {
             </SC.ActionsRow>
             <SC.ActionItemContainer>
                 {currentAction === TRANSACTION_ADD && <BalanceAdd />}
-                {currentAction === TRANSACTION_CONVERT && <CurrencyConverter />}
+                {currentAction === TRANSACTION_CONVERT && <MyConverter />}
             </SC.ActionItemContainer>
         </SC.Container>
     )
