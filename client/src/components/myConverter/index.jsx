@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from '../ui/input';
 import { CurrencyRadio } from '../сurrencyRadio';
-import { createConverterTemplates } from "./converterTemplates";
 import { getRates } from '../../helpers/getRates';
+import { getAllRates } from '../../helpers/getAllRates'
 import * as SC from './styles';
 
 export const MyConverter = () => {
@@ -14,34 +14,58 @@ export const MyConverter = () => {
 
     const [rates, setRates] = useState(null)
 
-    const templates = createConverterTemplates(baseCurrency, setBaseCurrency, targetCurrency, setTargetCurrency)
+    const [notification, setNotification] = useState({ message: null, error: false })
+
+    const fetchAllRates = async () => {
+        const newRates = await getAllRates()
+        setRates(newRates)
+        console.log(newRates)
+    }
 
     const resetAmounts = () => {
         setBaseAmount('')
         setTargetAmount('')
     }
 
+    const bothCurrencySelected = baseCurrency && targetCurrency
+
+    // useEffect(() => {
+    //     const fetchRates = async () => {
+    //         if (!bothCurrencySelected) return
+
+    //         const newRates = await getRates(baseCurrency, targetCurrency)
+    //         setRates(newRates)
+
+    //         if (notification.message === 'Выберите валюту') {
+    //             setNotification({ message: null, error: false })
+    //         }
+    //     }
+
+    //     fetchRates()
+    // }, [baseCurrency, targetCurrency])
+
+    useEffect(() => {
+        fetchAllRates()
+ 
+        const interval = setInterval(() => {
+             fetchAllRates()
+             console.log('fetch')
+        }, 5 * 60 * 1000)
+ 
+        return () => clearInterval(interval)
+     }, [])
+
     const handleInputChange = (e, setState) => {
         setState(e.target.value)
     }
 
-    const handleCurrencyChange = async (currency, type) => {
-        const { setCurrency, oppositeCurrency, setOppositeCurrency, oppositeType } = templates[type]
-
-        setCurrency(currency)
-        console.log(`${type + 'input'} : ${currency}`)
-
-        if (currency === oppositeCurrency) {
-            setOppositeCurrency(null)
-            resetAmounts()
+    const handleCurrencyChange = (currency, type) => {
+        if (type === 'base') {
+            setBaseCurrency(currency)
             return
         }
 
-        if (oppositeCurrency) {
-            const newRates = await getRates({ [type]: currency, [oppositeType]: oppositeCurrency })
-            setRates(newRates)
-            console.log(newRates)
-        }
+        setTargetCurrency(currency)
     }
 
     return (
@@ -67,6 +91,16 @@ export const MyConverter = () => {
                         onChange={(e) => handleInputChange(e, setTargetAmount)} />
                 </SC.Column>
             </SC.Wrapper>
+            {rates && bothCurrencySelected && (
+                <SC.Message>
+                    1 {baseCurrency} = {rates[baseCurrency.toUpperCase()][targetCurrency.toUpperCase()]} {targetCurrency}
+                </SC.Message>
+            )}
+            {notification.message && (
+                <SC.Message className={notification.error ? 'error' : ''}>
+                    {notification.message}
+                </SC.Message>
+            )}
         </SC.Container>
     )
 }
