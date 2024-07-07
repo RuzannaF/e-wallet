@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Input } from '../ui/input';
 import { CurrencyRadio } from '../сurrencyRadio';
-import { getRates } from '../../helpers/getRates';
 import { getAllRates } from '../../helpers/getAllRates'
 import * as SC from './styles';
+import { calculateAmount } from "../../helpers/calculateAmount";
+import { useSelector } from "react-redux";
 
 export const MyConverter = () => {
     const [baseCurrency, setBaseCurrency] = useState(null)
@@ -16,10 +17,19 @@ export const MyConverter = () => {
 
     const [notification, setNotification] = useState({ message: null, error: false })
 
+    const bothCurrencySelected = baseCurrency && targetCurrency
+    const rate = rates && bothCurrencySelected ? rates[baseCurrency.toUpperCase()][targetCurrency.toUpperCase()] : null
+
+    const { balance } = useSelector((state) => state.balance)
+
     const fetchAllRates = async () => {
         const newRates = await getAllRates()
         setRates(newRates)
-        console.log(newRates)
+    }
+
+    const getConvertedAmount = (type, amount) => {
+        const convertedAmount = rate ? calculateAmount(rate, type, amount) : ''
+        return convertedAmount
     }
 
     const resetAmounts = () => {
@@ -27,37 +37,40 @@ export const MyConverter = () => {
         setTargetAmount('')
     }
 
-    const bothCurrencySelected = baseCurrency && targetCurrency
-
-    // useEffect(() => {
-    //     const fetchRates = async () => {
-    //         if (!bothCurrencySelected) return
-
-    //         const newRates = await getRates(baseCurrency, targetCurrency)
-    //         setRates(newRates)
-
-    //         if (notification.message === 'Выберите валюту') {
-    //             setNotification({ message: null, error: false })
-    //         }
-    //     }
-
-    //     fetchRates()
-    // }, [baseCurrency, targetCurrency])
-
     useEffect(() => {
         fetchAllRates()
  
         const interval = setInterval(() => {
              fetchAllRates()
-             console.log('fetch')
         }, 5 * 60 * 1000)
  
         return () => clearInterval(interval)
      }, [])
 
-    const handleInputChange = (e, setState) => {
-        setState(e.target.value)
+    const handleInputChange = (e, type) => {
+        const amount = e.target.value
+
+        if (type === 'base') {
+            setBaseAmount(amount)
+            const newTargetAmount = getConvertedAmount(type, amount)
+            setTargetAmount(newTargetAmount)
+            return
+        }
+
+        setTargetAmount(amount)
+        const newBaseAmount = getConvertedAmount(type, amount)
+        setBaseAmount(newBaseAmount)
     }
+
+    useEffect (() => {
+        
+        if (baseAmount > balance[baseCurrency]) {
+            setNotification({ message: 'Недостаточно валюты для перевода', error: true })
+            return
+        }
+        
+        setNotification({ message: null, error: false })
+    }, [baseAmount])
 
     const handleCurrencyChange = (currency, type) => {
         if (type === 'base') {
@@ -80,7 +93,7 @@ export const MyConverter = () => {
                         setSelectedCurrency={(currency) => handleCurrencyChange(currency, 'base')} />
                     <Input
                         value={baseAmount}
-                        onChange={(e) => handleInputChange(e, setBaseAmount)} />
+                        onChange={(e) => handleInputChange(e, 'base')} />
                 </SC.Column>
                 <SC.Column>
                     <CurrencyRadio
@@ -88,14 +101,15 @@ export const MyConverter = () => {
                         setSelectedCurrency={(currency) => handleCurrencyChange(currency, 'target')} />
                     <Input
                         value={targetAmount}
-                        onChange={(e) => handleInputChange(e, setTargetAmount)} />
+                        onChange={(e) => handleInputChange(e, 'target')} />
                 </SC.Column>
             </SC.Wrapper>
-            {rates && bothCurrencySelected && (
+            {rate && (
                 <SC.Message>
-                    1 {baseCurrency} = {rates[baseCurrency.toUpperCase()][targetCurrency.toUpperCase()]} {targetCurrency}
+                    1 {baseCurrency} = {rate} {targetCurrency}
                 </SC.Message>
             )}
+            <br/>
             {notification.message && (
                 <SC.Message className={notification.error ? 'error' : ''}>
                     {notification.message}
