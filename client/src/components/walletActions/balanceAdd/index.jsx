@@ -22,9 +22,9 @@ export const BalanceAdd = () => {
     }
 
     const addAmount = () => {
-        const valideAmount = validateAmount(amountToAdd)
-        if (!valideAmount.isValid) {
-            setNotification({ message: valideAmount.message, error: true })
+        const validetedAmount = validateAmount(amountToAdd)
+        if (!validetedAmount.isValid) {
+            setNotification({ message: validetedAmount.message, error: true })
             return
         }
         if (!selectedCurrency) {

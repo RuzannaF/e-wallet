@@ -37,8 +37,8 @@ export const RadioItem = styled.div`
   border-radius: 5px;
   cursor: pointer;
   background-color: ${({ checked }) => (checked ? '#63B1FF' : 'transparent')};
-  ${({ highlight }) =>
-    highlight &&
+  ${({ $highlight }) =>
+    $highlight &&
     css`
       animation: ${wobbleHorBottom} 0.8s both;
     `}
