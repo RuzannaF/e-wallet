@@ -2,9 +2,13 @@ import { useEffect, useState } from "react";
 import { Input } from '../ui/input';
 import { CurrencyRadio } from '../сurrencyRadio';
 import { getAllRates } from '../../helpers/getAllRates'
-import * as SC from './styles';
 import { calculateAmount } from "../../helpers/calculateAmount";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Button } from "../ui/button";
+import { validateAmount } from "../../helpers/validateAmount";
+import { convertCurrency } from "../../redux/slices/balanceSlice";
+import { Arrow } from "../../svg/arrow";
+import * as SC from './styles';
 
 export const MyConverter = () => {
     const [baseCurrency, setBaseCurrency] = useState(null)
@@ -17,8 +21,23 @@ export const MyConverter = () => {
 
     const [notification, setNotification] = useState({ message: null, error: false })
 
+    const dispatch = useDispatch()
+
+    const { id } = useSelector((state) => state.auth.user)
+
     const bothCurrencySelected = baseCurrency && targetCurrency
-    const rate = rates && bothCurrencySelected ? rates[baseCurrency.toUpperCase()][targetCurrency.toUpperCase()] : null
+
+    const getRate = () => {
+        if (!bothCurrencySelected || !rates) {
+            return null
+        }
+
+        const base = baseCurrency.toUpperCase()
+        const target = targetCurrency.toUpperCase()
+        return rates[base][target]
+    }
+
+    const rate = getRate()
 
     const { balance } = useSelector((state) => state.balance)
 
@@ -32,20 +51,15 @@ export const MyConverter = () => {
         return convertedAmount
     }
 
-    const resetAmounts = () => {
-        setBaseAmount('')
-        setTargetAmount('')
-    }
-
     useEffect(() => {
         fetchAllRates()
- 
+
         const interval = setInterval(() => {
-             fetchAllRates()
+            fetchAllRates()
         }, 5 * 60 * 1000)
- 
+
         return () => clearInterval(interval)
-     }, [])
+    }, [])
 
     const handleInputChange = (e, type) => {
         const amount = e.target.value
@@ -62,13 +76,13 @@ export const MyConverter = () => {
         setBaseAmount(newBaseAmount)
     }
 
-    useEffect (() => {
-        
+    useEffect(() => {
+
         if (baseAmount > balance[baseCurrency]) {
             setNotification({ message: 'Недостаточно валюты для перевода', error: true })
             return
         }
-        
+
         setNotification({ message: null, error: false })
     }, [baseAmount])
 
@@ -81,40 +95,62 @@ export const MyConverter = () => {
         setTargetCurrency(currency)
     }
 
+    const convertSelectedCurrency = () => {
+        if (!baseCurrency || !targetCurrency) {
+            return setNotification({ message: 'Выберите валюту', error: true })
+        }
+        const validtedTargetAmount = targetAmount ? validateAmount(targetAmount) : { isValid: false }
+        const validtedBaseAmount = baseAmount ? validateAmount(baseAmount) : { isValid: false }
+
+        if (!validtedTargetAmount.isValid || !validtedBaseAmount.isValid) {
+            return setNotification({ message: 'Неккоректный ввод', error: true })
+        }
+        dispatch(convertCurrency({ baseCurrency: baseCurrency, targetCurrency: targetCurrency, amountToBuy: targetAmount, userId: id }))
+
+        setBaseAmount('')
+        setTargetAmount('')
+
+        setNotification({ message: 'Конвертация прошла успешно', error: false })
+    }
+
     return (
         <SC.Container>
-            My Converter
-            <br />
-            <br />
             <SC.Wrapper>
                 <SC.Column>
                     <CurrencyRadio
                         selectedCurrency={baseCurrency}
-                        setSelectedCurrency={(currency) => handleCurrencyChange(currency, 'base')} />
+                        setSelectedCurrency={(currency) => handleCurrencyChange(currency, 'base')} 
+                        highlight={notification.message === 'Выберите валюту'}/>
                     <Input
                         value={baseAmount}
-                        onChange={(e) => handleInputChange(e, 'base')} />
+                        onChange={(e) => handleInputChange(e, 'base')}
+                        placeholder={baseCurrency} />
                 </SC.Column>
+                <Arrow />
                 <SC.Column>
                     <CurrencyRadio
                         selectedCurrency={targetCurrency}
-                        setSelectedCurrency={(currency) => handleCurrencyChange(currency, 'target')} />
+                        setSelectedCurrency={(currency) => handleCurrencyChange(currency, 'target')} 
+                        highlight={notification.message === 'Выберите валюту'}/>
                     <Input
                         value={targetAmount}
-                        onChange={(e) => handleInputChange(e, 'target')} />
+                        onChange={(e) => handleInputChange(e, 'target')}
+                        placeholder={targetCurrency} />
                 </SC.Column>
             </SC.Wrapper>
-            {rate && (
-                <SC.Message>
-                    1 {baseCurrency} = {rate} {targetCurrency}
-                </SC.Message>
-            )}
-            <br/>
-            {notification.message && (
-                <SC.Message className={notification.error ? 'error' : ''}>
-                    {notification.message}
-                </SC.Message>
-            )}
+            <SC.Column>
+                {rate && (
+                    <SC.Message>
+                        1 {baseCurrency} = {rate} {targetCurrency}
+                    </SC.Message>
+                )}
+                <Button className='primary' onClick={convertSelectedCurrency}>Конвертировать</Button>
+                {notification.message && (
+                    <SC.Message className={notification.error ? 'error' : ''}>
+                        {notification.message}
+                    </SC.Message>
+                )}
+            </SC.Column>
         </SC.Container>
     )
 }
